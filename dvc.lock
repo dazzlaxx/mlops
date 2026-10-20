@@ -1,0 +1,130 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python -m src.prepare
+    deps:
+    - path: data/raw/credit_card.csv
+      hash: md5
+      md5: 33e0baf0216b704c68e4f5cd47ce62cd
+      size: 1368040
+    - path: src/prepare.py
+      hash: md5
+      md5: 8a038dce452836a98c0c48ebabd784b6
+      size: 1262
+    - path: src/utils.py
+      hash: md5
+      md5: 9a01df3e9e3099a1bba8550bfba9751a
+      size: 983
+    params:
+      params.yaml:
+        data:
+          raw: data/raw/credit_card.csv
+          target: default_payment_next_month
+          drop:
+          - ID
+          test_size: 0.2
+          stratify: true
+          seed: 42
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 2e3a53a9c703a16c64bba48e6e9348d5
+      size: 274076
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 3282be09a48268ddfd8664abb33cc0b0
+      size: 1094181
+  featurize:
+    cmd: python -m src.featurize
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 2e3a53a9c703a16c64bba48e6e9348d5
+      size: 274076
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 3282be09a48268ddfd8664abb33cc0b0
+      size: 1094181
+    - path: src/featurize.py
+      hash: md5
+      md5: 3a97942146b5858778238d982df65c3e
+      size: 1433
+    - path: src/utils.py
+      hash: md5
+      md5: 9a01df3e9e3099a1bba8550bfba9751a
+      size: 983
+    params:
+      params.yaml:
+        data.drop:
+        - ID
+        data.target: default_payment_next_month
+        featurize:
+          one_hot:
+          - SEX
+          - EDUCATION
+          - MARRIAGE
+    outs:
+    - path: data/features/test.csv
+      hash: md5
+      md5: 8b5f979d6a0247f158601564388e5c0a
+      size: 407367
+    - path: data/features/train.csv
+      hash: md5
+      md5: 3a21da486c35d8f1f613204343bc9f31
+      size: 1626993
+  train:
+    cmd: python -m src.train
+    deps:
+    - path: data/features/train.csv
+      hash: md5
+      md5: 3a21da486c35d8f1f613204343bc9f31
+      size: 1626993
+    - path: src/train.py
+      hash: md5
+      md5: 6ca6cbe2184aea1695dd660b1e01e90b
+      size: 1858
+    - path: src/utils.py
+      hash: md5
+      md5: 9a01df3e9e3099a1bba8550bfba9751a
+      size: 983
+    params:
+      params.yaml:
+        train:
+          model: random_forest
+          n_estimators: 300
+          max_depth: 12
+          min_samples_leaf: 5
+          seed: 42
+    outs:
+    - path: models/model.joblib
+      hash: md5
+      md5: 188753b937ac9f9e2d4207808dfe133a
+      size: 20273448
+  evaluate:
+    cmd: python -m src.evaluate
+    deps:
+    - path: data/features/test.csv
+      hash: md5
+      md5: 8b5f979d6a0247f158601564388e5c0a
+      size: 407367
+    - path: models/model.joblib
+      hash: md5
+      md5: 188753b937ac9f9e2d4207808dfe133a
+      size: 20273448
+    - path: src/evaluate.py
+      hash: md5
+      md5: 0e0060d85f69286674a1df1e2035e96f
+      size: 1456
+    - path: src/utils.py
+      hash: md5
+      md5: 9a01df3e9e3099a1bba8550bfba9751a
+      size: 983
+    params:
+      params.yaml:
+        evaluate:
+          min_accuracy: 0.75
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 8391ad887f06d1e28c81016e2aa2d232
+      size: 79

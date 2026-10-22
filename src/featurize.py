@@ -9,13 +9,20 @@ import pandas as pd
 from src.utils import ensure_parent, get_logger, load_params
 
 log = get_logger("featurize")
-IN = {"train": Path("data/processed/train.csv"), "test": Path("data/processed/test.csv")}
+IN = {
+    "train": Path("data/processed/train.csv"),
+    "test": Path("data/processed/test.csv"),
+}
 OUT = {"train": Path("data/features/train.csv"), "test": Path("data/features/test.csv")}
 
 
 def build(frame: pd.DataFrame, target: str, drop: list[str]) -> pd.DataFrame:
-    features = frame.drop(columns=[c for c in drop if c in frame.columns], errors="ignore")
-    features["rooms_per_person"] = features["AveRooms"] / features["AveOccup"].clip(lower=1)
+    features = frame.drop(
+        columns=[c for c in drop if c in frame.columns], errors="ignore"
+    )
+    features["rooms_per_person"] = features["AveRooms"] / features["AveOccup"].clip(
+        lower=1
+    )
     ordered = [c for c in features.columns if c != target]
     if target in features.columns:
         ordered.append(target)

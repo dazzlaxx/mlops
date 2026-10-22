@@ -45,3 +45,9 @@ R2 на v2 ниже, потому что в полный набор входят
 ## Окружение
 
 Зафиксировано в uv.lock, разворачивается через uv export и pip install.
+
+## Сценарий смены версии данных
+
+1. v1 (north): `python -m src.ingest --version north`, `dvc add`, `dvc push`, `dvc repro` → r2 0.8529, n_test 1870. Зафиксировано тегом `data-v1`.
+2. v2 (all): `python -m src.ingest --version all`, `dvc add`, `dvc push`, `dvc repro` → r2 0.8300, n_test 4128. Зафиксировано тегом `data-v2`.
+3. Возврат: `git checkout data-v1 && dvc checkout && dvc repro` → снова r2 0.8529, n_test 1870.

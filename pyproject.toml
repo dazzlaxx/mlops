@@ -1,16 +1,16 @@
 [project]
 name = "mlops-labs"
 version = "0.1.0"
-description = "Лабораторная работа 1, вариант 6 — Default of Credit Card Clients"
+description = "Лабораторные работы MLOps, вариант 5 — California Housing"
 requires-python = ">=3.12"
 dependencies = [
-    "pandas>=2.2",
-    "scikit-learn>=1.5",
+    "pandas>=2.2,<3.0",
+    "numpy>=1.26,<2.3",
+    "scikit-learn>=1.5,<1.7",
     "pyyaml>=6.0",
     "joblib>=1.4",
-    "dvc[s3]>=3.55",
-    "pandera>=0.22",
-    "openpyxl>=3.1",
+    "dvc[s3]>=3.55,<4.0",
+    "pandera>=0.20,<0.24",
 ]
 
 [dependency-groups]

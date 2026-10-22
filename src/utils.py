@@ -1,4 +1,5 @@
-"""Общие вспомогательные функции."""
+"""Общие функции: параметры, журналирование, фиксация случайности."""
+
 from __future__ import annotations
 
 import logging
@@ -13,10 +14,9 @@ PARAMS_PATH = Path("params.yaml")
 
 
 def load_params(path: Path | str = PARAMS_PATH) -> dict[str, Any]:
-    text = Path(path).read_text(encoding="utf-8")
-    params = yaml.safe_load(text)
+    params = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     if not isinstance(params, dict):
-        raise TypeError(f"{path}: ожидался словарь параметров")
+        raise TypeError(f"{path}: ожидался словарь")
     return params
 
 
@@ -28,7 +28,7 @@ def set_seed(seed: int) -> np.random.Generator:
 def get_logger(name: str) -> logging.Logger:
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s %(name)-16s %(message)s",
+        format="%(asctime)s %(name)-12s %(message)s",
         datefmt="%H:%M:%S",
     )
     return logging.getLogger(name)

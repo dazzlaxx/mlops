@@ -3,128 +3,130 @@ stages:
   prepare:
     cmd: python -m src.prepare
     deps:
-    - path: data/raw/credit_card.csv
+    - path: data/raw/housing.csv
       hash: md5
-      md5: 33a5b76bb4495c406c42f09775b5480b
-      size: 2867208
+      md5: 84d4b5ef64a9ccff7528d0de4bdfe9ad
+      size: 854682
     - path: src/prepare.py
       hash: md5
-      md5: 8a038dce452836a98c0c48ebabd784b6
-      size: 1262
+      md5: 20124b79500347565e40cf39eda5c3d1
+      size: 1376
+    - path: src/schema.py
+      hash: md5
+      md5: 8e99f18eb7f5acd99d56bce1c9bc0713
+      size: 646
     - path: src/utils.py
       hash: md5
-      md5: 9a01df3e9e3099a1bba8550bfba9751a
-      size: 983
+      md5: 0fc8d4ef4f0079a845bff7e1e3e390d2
+      size: 1007
     params:
       params.yaml:
         data:
-          raw: data/raw/credit_card.csv
-          target: default_payment_next_month
-          drop:
-          - ID
+          raw: data/raw/housing.csv
+          target: MedHouseVal
+          drop: []
           test_size: 0.2
-          stratify: true
-          seed: 42
+          split_by_time: false
+        train.seed: 42
     outs:
     - path: data/processed/test.csv
       hash: md5
-      md5: 20b1477720a40d9b902c79ba41b44a7a
-      size: 573858
+      md5: 719387193f7b587f3f267545d522fbad
+      size: 170825
     - path: data/processed/train.csv
       hash: md5
-      md5: 5a8a2234fb25f81ad11c44962bd4e8a9
-      size: 2293567
+      md5: 731ead5a8d25cdd2853ff2bcc682c47b
+      size: 683718
   featurize:
     cmd: python -m src.featurize
     deps:
     - path: data/processed/test.csv
       hash: md5
-      md5: 20b1477720a40d9b902c79ba41b44a7a
-      size: 573858
+      md5: 719387193f7b587f3f267545d522fbad
+      size: 170825
     - path: data/processed/train.csv
       hash: md5
-      md5: 5a8a2234fb25f81ad11c44962bd4e8a9
-      size: 2293567
+      md5: 731ead5a8d25cdd2853ff2bcc682c47b
+      size: 683718
     - path: src/featurize.py
       hash: md5
-      md5: 3a97942146b5858778238d982df65c3e
-      size: 1433
+      md5: fdee782dbd39e987adeb3ac7242897a8
+      size: 1264
     - path: src/utils.py
       hash: md5
-      md5: 9a01df3e9e3099a1bba8550bfba9751a
-      size: 983
+      md5: 0fc8d4ef4f0079a845bff7e1e3e390d2
+      size: 1007
     params:
       params.yaml:
-        data.drop:
-        - ID
-        data.target: default_payment_next_month
-        featurize:
-          one_hot:
-          - SEX
-          - EDUCATION
-          - MARRIAGE
+        data.drop: []
+        data.target: MedHouseVal
     outs:
     - path: data/features/test.csv
       hash: md5
-      md5: ea6b89d96105c66bf723cdb81a9940d8
-      size: 848569
+      md5: 8a73357e65120ba91b46e412273a6f9d
+      size: 205490
     - path: data/features/train.csv
       hash: md5
-      md5: 609b8a7f41bdb6cacc83365f20aecfa1
-      size: 3392088
+      md5: f127ccc1db42e543ceae66a1a4e45b88
+      size: 821935
   train:
     cmd: python -m src.train
     deps:
     - path: data/features/train.csv
       hash: md5
-      md5: 609b8a7f41bdb6cacc83365f20aecfa1
-      size: 3392088
+      md5: f127ccc1db42e543ceae66a1a4e45b88
+      size: 821935
     - path: src/train.py
       hash: md5
-      md5: 6ca6cbe2184aea1695dd660b1e01e90b
-      size: 1858
+      md5: afb67d891a7d452adb972b597f6e2ede
+      size: 1705
     - path: src/utils.py
       hash: md5
-      md5: 9a01df3e9e3099a1bba8550bfba9751a
-      size: 983
+      md5: 0fc8d4ef4f0079a845bff7e1e3e390d2
+      size: 1007
     params:
       params.yaml:
         train:
-          model: random_forest
-          n_estimators: 300
-          max_depth: 12
-          min_samples_leaf: 5
+          model: gradient_boosting
+          n_estimators: 500
+          max_depth: 4
+          min_samples_leaf: 2
+          learning_rate: 0.1
           seed: 42
     outs:
     - path: models/model.joblib
       hash: md5
-      md5: dcf8792a7232a707bfdf45aac1978cce
-      size: 26738728
+      md5: 72dd1e35801f59b8a786ef6844641625
+      size: 1128343
   evaluate:
     cmd: python -m src.evaluate
     deps:
     - path: data/features/test.csv
       hash: md5
-      md5: ea6b89d96105c66bf723cdb81a9940d8
-      size: 848569
+      md5: 8a73357e65120ba91b46e412273a6f9d
+      size: 205490
     - path: models/model.joblib
       hash: md5
-      md5: dcf8792a7232a707bfdf45aac1978cce
-      size: 26738728
+      md5: 72dd1e35801f59b8a786ef6844641625
+      size: 1128343
     - path: src/evaluate.py
       hash: md5
-      md5: 0e0060d85f69286674a1df1e2035e96f
-      size: 1456
+      md5: 6c23c118331b2df6a27770e84b5a5ce5
+      size: 1670
     - path: src/utils.py
       hash: md5
-      md5: 9a01df3e9e3099a1bba8550bfba9751a
-      size: 983
+      md5: 0fc8d4ef4f0079a845bff7e1e3e390d2
+      size: 1007
     params:
       params.yaml:
         evaluate:
-          min_accuracy: 0.75
+          min_r2: 0.6
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 9d95679debd4517c59d157d209dcd97e
-      size: 78
+      md5: 2d24717ff3944a275f8434d937d4354e
+      size: 69
+    - path: reports/plots/pred_vs_true.csv
+      hash: md5
+      md5: 544199a45a83763aaf272323fbcd8958
+      size: 12325

@@ -1,11 +1,9 @@
-"""Имитация выгрузки данных: срез по кредитному лимиту.
+"""Имитация выгрузки: срез California Housing по широте.
 
-v1: только клиенты с LIMIT_BAL < порога (обучающая версия).
-v2: все клиенты (--no-limit).
-
-    python -m src.ingest                    # v1 из params.yaml
-    python -m src.ingest --no-limit         # v2
+python -m src.ingest                 #версия из params.yaml
+python -m src.ingest --version all   #все районы (v2)
 """
+
 from __future__ import annotations
 
 import argparse
@@ -20,29 +18,28 @@ log = get_logger("ingest")
 
 def main() -> None:
     params = load_params()
-    ingest = params["ingest"]
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--no-limit", action="store_true", help="не фильтровать по лимиту (v2)")
-    parser.add_argument("--source", type=Path, default=Path(ingest["source"]))
+    ing = params["ingest"]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--version", default=ing["version"])
+    parser.add_argument("--source", type=Path, default=Path(ing["source"]))
     parser.add_argument("--out", type=Path, default=Path(params["data"]["raw"]))
     args = parser.parse_args()
 
-    df = pd.read_csv(args.source)
-    df.columns = [c.strip().replace(" ", "_") for c in df.columns]
-    # UCI исходный файл имеет строку-заголовок с ID; после read_csv первая колонка может быть unnamed
-    if "ID" not in df.columns and df.columns[0] == "Unnamed:_0":
-        df = df.rename(columns={"Unnamed:_0": "ID"})
+    frame = pd.read_csv(args.source)
+    threshold = float(ing["latitude_threshold"])
 
-    if not args.no_limit and ingest.get("limit_threshold") is not None:
-        threshold = ingest["limit_threshold"]
-        df = df[df["LIMIT_BAL"] < threshold]
-        log.info("фильтр LIMIT_BAL < %s", threshold)
+    if args.version == "north":
+        sliced = frame[frame["Latitude"] >= threshold].copy()
+    elif args.version == "all":
+        sliced = frame.copy()
+    else:
+        raise ValueError(f"неизвестная версия: {args.version}")
 
-    if df.empty:
-        raise ValueError("после фильтрации не осталось строк")
+    if sliced.empty:
+        raise ValueError("пустой срез")
 
-    df.to_csv(ensure_parent(args.out), index=False)
-    log.info("выгрузка: %d строк -> %s", len(df), args.out)
+    sliced.to_csv(ensure_parent(args.out), index=False)
+    log.info("версия %s: %d строк -> %s", args.version, len(sliced), args.out)
 
 
 if __name__ == "__main__":

@@ -3,10 +3,12 @@ stages:
     cmd: python -m src.prepare
     deps:
       - src/prepare.py
+      - src/schema.py
       - src/utils.py
-      - data/raw/credit_card.csv
+      - data/raw/housing.csv
     params:
       - data
+      - train.seed
     outs:
       - data/processed/train.csv
       - data/processed/test.csv
@@ -21,7 +23,6 @@ stages:
     params:
       - data.target
       - data.drop
-      - featurize
     outs:
       - data/features/train.csv
       - data/features/test.csv
@@ -48,4 +49,9 @@ stages:
       - evaluate
     metrics:
       - reports/metrics.json:
+          cache: false
+    plots:
+      - reports/plots/pred_vs_true.csv:
+          x: y_true
+          y: y_pred
           cache: false

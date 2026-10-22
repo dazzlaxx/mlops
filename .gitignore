@@ -1,13 +1,6 @@
-.dvc/config.local
-data/external/
-data/processed/
-data/features/
-models/
-reports/plots/
 __pycache__/
 *.pyc
-.pytest_cache/
-.ruff_cache/
-data/raw/*
-!data/raw/*.dvc
-!data/raw/.gitignore
+.dvc/config.local
+.dvc/tmp/
+.dvc/cache/
+data/external/

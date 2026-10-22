@@ -1,26 +1,22 @@
 ingest:
-  source: data/external/default_of_credit_card_clients.csv
-  limit_threshold: 140000    # v1: только клиенты с лимитом ниже порога; null = v2 (все)
-  # Для v2 выполните: python -m src.ingest --no-limit
-  # Затем: dvc add data/raw/credit_card.csv && dvc repro
+  source: data/external/california_housing.csv
+  latitude_threshold: 35.0
+  version: north
 
 data:
-  raw: data/raw/credit_card.csv
-  target: default_payment_next_month
-  drop: [ID]
+  raw: data/raw/housing.csv
+  target: MedHouseVal
+  drop: []
   test_size: 0.2
-  stratify: true
-  seed: 42
-
-featurize:
-  one_hot: [SEX, EDUCATION, MARRIAGE]
+  split_by_time: false
 
 train:
-  model: random_forest
-  n_estimators: 300
-  max_depth: 12
-  min_samples_leaf: 5
+  model: gradient_boosting
+  n_estimators: 500
+  max_depth: 4
+  min_samples_leaf: 2
+  learning_rate: 0.1
   seed: 42
 
 evaluate:
-  min_accuracy: 0.75
+  min_r2: 0.60

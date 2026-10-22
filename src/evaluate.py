@@ -1,4 +1,5 @@
-"""evaluate: метрики классификации."""
+"""evaluate: метрики и проверка порога."""
+
 from __future__ import annotations
 
 import json
@@ -6,22 +7,23 @@ import sys
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 from src.utils import ensure_parent, get_logger, load_params
 
 log = get_logger("evaluate")
-
 FEATURES = Path("data/features/test.csv")
 MODEL = Path("models/model.joblib")
 METRICS_OUT = Path("reports/metrics.json")
+PLOT_OUT = Path("reports/plots/pred_vs_true.csv")
 
 
 def main() -> None:
     params = load_params()
     target = params["data"]["target"]
-    min_accuracy = float(params["evaluate"]["min_accuracy"])
+    min_r2 = float(params["evaluate"]["min_r2"])
 
     bundle = joblib.load(MODEL)
     model, feature_names = bundle["model"], bundle["features"]
@@ -30,19 +32,23 @@ def main() -> None:
     x_test = frame[feature_names]
     y_test = frame[target]
     y_pred = model.predict(x_test)
-    y_prob = model.predict_proba(x_test)[:, 1]
 
     metrics = {
-        "accuracy": round(float(accuracy_score(y_test, y_pred)), 4),
-        "f1": round(float(f1_score(y_test, y_pred)), 4),
-        "roc_auc": round(float(roc_auc_score(y_test, y_prob)), 4),
+        "r2": round(float(r2_score(y_test, y_pred)), 4),
+        "mae": round(float(mean_absolute_error(y_test, y_pred)), 3),
+        "rmse": round(float(np.sqrt(mean_squared_error(y_test, y_pred))), 3),
         "n_test": int(len(frame)),
     }
     METRICS_OUT.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
-    log.info("метрики: %s", metrics)
 
-    if metrics["accuracy"] < min_accuracy:
-        log.error("accuracy = %.4f ниже порога %.2f", metrics["accuracy"], min_accuracy)
+    sample = pd.DataFrame({"y_true": y_test, "y_pred": y_pred}).sample(
+        n=min(500, len(frame)), random_state=int(params["train"]["seed"])
+    )
+    sample.to_csv(ensure_parent(PLOT_OUT), index=False)
+
+    log.info("метрики: %s", metrics)
+    if metrics["r2"] < min_r2:
+        log.error("R2 %.4f ниже порога %.2f", metrics["r2"], min_r2)
         sys.exit(1)
 
 

@@ -50,8 +50,8 @@ stages:
       size: 1511217
     - path: src/featurize.py
       hash: md5
-      md5: fdee782dbd39e987adeb3ac7242897a8
-      size: 1264
+      md5: fc9631c26ef47fe383bbbdca41efe69e
+      size: 1303
     - path: src/utils.py
       hash: md5
       md5: 0fc8d4ef4f0079a845bff7e1e3e390d2

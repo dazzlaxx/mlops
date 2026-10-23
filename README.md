@@ -51,3 +51,16 @@ R2 на v2 ниже, потому что в полный набор входят
 1. v1 (north): `python -m src.ingest --version north`, `dvc add`, `dvc push`, `dvc repro` → r2 0.8529, n_test 1870. Зафиксировано тегом `data-v1`.
 2. v2 (all): `python -m src.ingest --version all`, `dvc add`, `dvc push`, `dvc repro` → r2 0.8300, n_test 4128. Зафиксировано тегом `data-v2`.
 3. Возврат: `git checkout data-v1 && dvc checkout && dvc repro` → снова r2 0.8529, n_test 1870.
+
+## Сравнение моделей (дополнительное задание)
+
+Модель задаётся в `params.yaml` полем `train.model`. Код `src/train.py` не менялся — `make_model` выбирает класс по имени.
+
+| Модель | R2 | MAE | RMSE | n_test |
+|---|---|---|---|---|
+| gradient_boosting (базовая) | 0.8300 | 0.318 | 0.478 | 4128 |
+| random_forest | 0.5995 | 0.540 | 0.734 | 4128 |
+
+RandomForest с `n_estimators=500`, `max_depth=4`, `min_samples_leaf=2` показал R2 заметно ниже, чем GradientBoosting: бустинг последовательно исправляет ошибки предыдущих деревьев и лучше улавливает нелинейности, тогда как случайный лес с малой глубиной усредняет независимые деревья и на этом наборе обобщает слабее. При этом RandomForest не прошёл порог `evaluate.min_r2: 0.60` (R2 = 0.5995), и этап `evaluate` завершился с ошибкой — это ожидаемое поведение проверки качества.
+
+Переключение модели выполняется только правкой `params.yaml`; `dvc repro` пересчитывает `train` и `evaluate`, не трогая `prepare` и `featurize`.

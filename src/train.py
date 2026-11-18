@@ -1,16 +1,23 @@
-"""train: обучение модели."""
+"""Этап train: обучение модели на подготовленных признаках.
+
+Если задана переменная MLFLOW_TRACKING_URI, этап дополнительно открывает запуск
+в MLflow, пишет туда параметры и саму модель. Метрики допишет этап evaluate.
+"""
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 import joblib
 import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 
+from src import tracking
 from src.utils import ensure_parent, get_logger, load_params, set_seed
 
 log = get_logger("train")
+
 FEATURES = Path("data/features/train.csv")
 MODEL_OUT = Path("models/model.joblib")
 
@@ -47,12 +54,22 @@ def main() -> None:
     x_train = frame.drop(columns=[target])
     y_train = frame[target]
 
+    run_params = dict(tp) | {
+        "n_train_rows": len(x_train),
+        "n_features": x_train.shape[1],
+    }
+    tracking.start_run(params["mlflow"]["experiment"], run_params)
+
     model = make_model(tp)
+    started = time.perf_counter()
     model.fit(x_train, y_train)
+    tracking.log_train_metrics({"fit_seconds": round(time.perf_counter() - started, 2)})
 
     bundle = {"model": model, "features": list(x_train.columns)}
     joblib.dump(bundle, ensure_parent(MODEL_OUT))
-    log.info("обучено %s на %d строках", tp["model"], len(frame))
+    tracking.log_model(model, list(x_train.columns), x_train.head(50))
+
+    log.info("обучено %s на %d строках -> %s", tp["model"], len(frame), MODEL_OUT)
 
 
 if __name__ == "__main__":

@@ -31,6 +31,7 @@ stages:
     cmd: python -m src.train
     deps:
       - src/train.py
+      - src/tracking.py
       - src/utils.py
       - data/features/train.csv
     params:
@@ -42,6 +43,7 @@ stages:
     cmd: python -m src.evaluate
     deps:
       - src/evaluate.py
+      - src/tracking.py
       - src/utils.py
       - models/model.joblib
       - data/features/test.csv

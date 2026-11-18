@@ -1,0 +1,7 @@
+№,model,n_estimators,max_depth,min_samples_leaf,learning_rate,seed,r2,mae,rmse,seconds,fit_seconds,in_mlflow,run_id
+1,random_forest,300,16,2,0.1,42,0.8576,0.283,0.447,60.8,28.83,True,bddaa2f869124bedbbcaa662c14af576
+2,random_forest,600,24,1,0.1,42,0.8585,0.282,0.445,168.1,57.94,True,4d7a037ce2ec45bb8e584328a7ac8750
+3,gradient_boosting,300,3,2,0.1,42,0.8406,0.31,0.472,35.6,11.74,True,24474a28e1a14f0090ca7123fd590767
+4,gradient_boosting,500,4,2,0.1,42,0.8529,0.292,0.454,49.2,25.68,True,fa092b127615482f8eba749f4c90fadd
+5,gradient_boosting,800,5,4,0.1,42,0.854,0.287,0.452,73.0,50.52,True,c5bb444f64ae4545a306bc3b2a5ef651
+6,gradient_boosting,600,6,3,0.05,42,0.8616,0.279,0.44,68.7,44.68,True,3dfece42e44b4ea18c28b387d8117455
